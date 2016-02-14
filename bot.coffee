@@ -57,7 +57,7 @@ bot.onText RegExp("^/rule(@#{conf.botName})?$"), (msg, _) ->
     r.hget key, "rule", (err, obj)->
       redis.print err, obj
       if !obj?
-        bot.sendMessage msg.from.id, "no rule"
+        bot.sendMessage msg.from.id, "并没有规则 (*ﾟーﾟ)"
         return
       bot.sendMessage msg.from.id, obj
       console.log(msg)
@@ -79,7 +79,7 @@ bot.onText RegExp("^/autorule(@#{conf.botName})?$"), (msg, _)->
     console.log(msg)
 
 # check-in
-bot.onText /滴|打卡|签到|di(.*)/, (msg, _) ->
+bot.onText /^滴|打卡|签到|di(.*)/, (msg, _) ->
   date = new Date msg.date * 1000
   # 6:00 ~ 9:00
   if date.getHours() >= 6 && date.getHours() < 9
@@ -106,7 +106,7 @@ bot.onText /滴|打卡|签到|di(.*)/, (msg, _) ->
         这是您本月的第 #{reply} 次晨间打卡。 \n今天又是美好的一天！ \n祝您生活愉快一切顺利。 "
           bot.sendMessage(msg.from.id, morning)
   # 22:00 ~ 24:00
-  else if date.getHours() >= 17 && date.getHours() < 24
+  else if date.getHours() >= 22 && date.getHours() < 24
     key = "Shan8Bot:night:#{msg.from.id}"
     console.log(key)
     console.log(msg.from.username)
@@ -129,3 +129,11 @@ bot.onText /滴|打卡|签到|di(.*)/, (msg, _) ->
           night = "Bingbo!!! \n您已顺利的打卡成功。 \n时间为 #{date.formattedTime()} \n\
             本月第 #{reply} 次夜间打卡。 \n打卡了一定要睡觉喔。 \n祝您做个美梦。 \n晚安。"
           bot.sendMessage(msg.from.id, night)
+  # 00:00 ~ 06:00
+  else if date.getHours() >= 0 && date.getHours() < 6
+    bot.sendMessage msg.from.id, "已错过打卡时间，下次打卡时间为 6:00 ~ 9:00"
+    return
+  # 9:00 ~ 22:00
+  else if date.getHours() >= 9 && date.getHours() < 22
+    bot.sendMessage msg.from.id, "已错过打卡时间，下次打卡时间为 22:00 ~ 24:00"
+  return
