@@ -13,7 +13,7 @@ Date.prototype.formattedTime = ->
   zeroFormat = (d) ->
     ("0" + d).substr(-2)
   month = zeroFormat @getMonth()
-  day = zeroFormat @getDay()
+  day = zeroFormat @getDate()
   hours = zeroFormat @getHours()
   minutes = zeroFormat @getMinutes()
   seconds = zeroFormat @getSeconds()
@@ -82,7 +82,7 @@ bot.onText RegExp("^/autorule(@#{conf.botName})?$"), (msg, _)->
 bot.onText /^滴|打卡|签到|di(.*)/, (msg, _) ->
   date = new Date msg.date * 1000
   # 6:00 ~ 9:00
-  if date.getHours() >= 6 && date.getHours() < 9
+  if date.getHours() >= 1 && date.getHours() < 9
     key = "Shan8Bot:morning:#{msg.from.id}"
     console.log(key)
     console.log(msg.from.username)
