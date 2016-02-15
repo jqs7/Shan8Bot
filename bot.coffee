@@ -26,7 +26,7 @@ bot.on 'new_chat_participant', (msg) ->
     r.hget key, "auto", (err, obj)->
       redis.print err, obj
       if obj?
-        r.hget key, "rule", (err, obj)->
+        r.hget key, "rule", (err, obj) ->
           redis.print err, obj
           if obj?
             console.log("send #{msg.new_chat_participant.id} #{obj}")
@@ -37,7 +37,7 @@ bot.on 'new_chat_participant', (msg) ->
 bot.onText RegExp("^/setrule(@#{conf.botName})? (.+)"), (msg, rule) ->
   if msg.chat.type == 'group' || msg.chat.type == 'supergroup'
     key = "Shan8Bot:group:#{msg.chat.id}"
-    r.hset key, "rule", rule[2], (err, obj)->
+    r.hset key, "rule", rule[2], (err, obj) ->
       redis.print err, obj
       bot.sendMessage msg.chat.id, "new rule get"
 
@@ -79,7 +79,7 @@ bot.onText RegExp("^/autorule(@#{conf.botName})?$"), (msg, _)->
     console.log(msg)
 
 # check-in
-bot.onText /^滴|打卡|签到|di(.*)/, (msg, _) ->
+bot.onText /^(滴|打卡|签到|di)(.*)/, (msg, _) ->
   date = new Date msg.date * 1000
   # 6:00 ~ 9:00
   if date.getHours() >= 6 && date.getHours() < 9
@@ -110,7 +110,7 @@ bot.onText /^滴|打卡|签到|di(.*)/, (msg, _) ->
     key = "Shan8Bot:night:#{msg.from.id}"
     console.log(key)
     console.log(msg.from.username)
-    r.hget key, "last", (err, obj)->
+    r.hget key, "last", (err, obj) ->
       if obj?
         last = new Date obj * 1000
         if date.getFullYear() == last.getFullYear()\
