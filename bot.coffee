@@ -12,7 +12,7 @@ r.auth conf.redisPass
 Date.prototype.formattedTime = ->
   zeroFormat = (d) ->
     ("0" + d).substr(-2)
-  month = zeroFormat @getMonth()
+  month = zeroFormat @getMonth()+1
   day = zeroFormat @getDate()
   hours = zeroFormat @getHours()
   minutes = zeroFormat @getMinutes()
