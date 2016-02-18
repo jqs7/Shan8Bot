@@ -136,4 +136,4 @@ bot.onText /^(滴|打卡|签到|di)(.*)/, (msg, _) ->
   # 9:00 ~ 22:00
   else if date.getHours() >= 9 && date.getHours() < 22
     bot.sendMessage msg.from.id, "已错过打卡时间，下次打卡时间为 22:00 ~ 24:00"
-  return
+    return

@@ -7,5 +7,8 @@
     "node-telegram-bot-api": "^0.20.1",
     "redis": "^2.4.2"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "babel-cli": "^6.5.1"
+  }
 }
