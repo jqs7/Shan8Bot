@@ -41,8 +41,7 @@ bot.onText(/^(滴|打卡|签到|di)(.*)/, (msg, _)=> {
       r.hset(key, "last", msg.date, redis.print);
       r.hincrby(key, `${date.getFullYear()}:${date.getMonth()}`, 1, (err, reply)=> {
         redis.print(err, reply);
-        bot.sendMessage(msg.from.id, `早上好! \n您已顺利的打卡成功。 \n时间为 ${date.formattedTime()} \n
-        这是您本月的第 ${reply} 次晨间打卡。 \n今天又是美好的一天！ \n祝您生活愉快一切顺利。 `);
+        bot.sendMessage(msg.from.id, `早上好! \n您已顺利的打卡成功。 \n时间为 ${date.formattedTime()} \n这是您本月的第 ${reply} 次晨间打卡。 \n今天又是美好的一天！ \n祝您生活愉快一切顺利。 `);
       });
     });
     // 22:00 ~ 24:00
@@ -61,8 +60,7 @@ bot.onText(/^(滴|打卡|签到|di)(.*)/, (msg, _)=> {
       r.hset(key, "last", msg.date, redis.print);
       r.hincrby(key, `${date.getFullYear()}:${date.getMonth()}`, 1, (err, reply)=> {
         redis.print(err, reply);
-        bot.sendMessage(msg.from.id, `Bingbo!!! \n您已顺利的打卡成功。 \n时间为 ${date.formattedTime()} \n
-            这是您本月的第 ${reply} 次夜间打卡。 \n打卡了一定要睡觉喔。 \n祝您做个美梦。 \n晚安。`);
+        bot.sendMessage(msg.from.id, `Bingbo!!! \n您已顺利的打卡成功。 \n时间为 ${date.formattedTime()} \n这是您本月的第 ${reply} 次夜间打卡。 \n打卡了一定要睡觉喔。 \n祝您做个美梦。 \n晚安。`);
       });
     });
     // 00:00 ~ 06:00
