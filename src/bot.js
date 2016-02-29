@@ -11,6 +11,17 @@ const bot = new Bot(conf.botAPI, { polling: true });
 const r = redis.createClient();
 r.auth(conf.redisPass);
 
+// check if array contains the obj
+Array.prototype.contains = function (obj) {
+    var i = this.length;
+    while (i--) {
+        if (this[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // date formatter
 Date.prototype.formattedTime = function () {
     const zeroFormat = (d) => {
@@ -27,6 +38,14 @@ Date.prototype.formattedTime = function () {
 // check if msg is from a group
 function isGroup(msg) {
     if (msg.chat.type === 'group' || msg.chat.type === 'supergroup') {
+        return true;
+    }
+    return false;
+}
+
+// check msg is from master
+function isMaster(msg) {
+    if (conf.masters.contains(msg.from.username)) {
         return true;
     }
     return false;
@@ -131,8 +150,46 @@ bot.onText(new RegExp(`^/titles(@${conf.botName})?( (.*))?$`), (msg, data) => {
     })
 });
 
+// start command
 bot.onText(/^\/start$/, (msg) => {
     bot.sendMessage(msg.from.id, conf.startText);
 });
+
+// new member join in the chat
+bot.on('new_chat_participant', (msg) => {
+    const key = `Shan8Bot:welcome:${msg.chat.id}`
+    r.get(key, (err, obj) => {
+        if (obj) {
+            let username;
+
+            if (msg.new_chat_participant.username) {
+                username = '@' + msg.new_chat_participant.username;
+            } else {
+                username = msg.new_chat_participant.first_name + ' ' + msg.new_chat_participant.last_name
+            }
+            const welcomeText = conf.welcomeText.replace('$username', username)
+            bot.sendMessage(msg.chat.id, welcomeText);
+        }
+    })
+
+});
+
+// toggle new member welcome
+bot.onText(/\/welcome/, (msg) => {
+    if (isGroup(msg) && isMaster(msg)) {
+        const key = `Shan8Bot:welcome:${msg.chat.id}`
+        r.get(key, (err, obj) => {
+            if (obj) {
+                r.del(key, (err, obj) => {
+                    bot.sendMessage(msg.chat.id, 'welcome disabled');
+                });
+            } else {
+                r.set(key, true, (err, obj) => {
+                    bot.sendMessage(msg.chat.id, 'welcome enabled');
+                });
+            }
+        })
+    }
+})
 
 console.log('bot start up!');

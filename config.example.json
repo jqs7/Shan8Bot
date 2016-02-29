@@ -2,5 +2,9 @@
   "botAPI": "xxx",
   "botName": "xxx",
   "redisPass": "xxx",
-  "startText": "xxx"
+  "startText": "xxx",
+  "welcomeText": "xxx",
+  "masters": [
+    "xxx"
+  ]
 }
