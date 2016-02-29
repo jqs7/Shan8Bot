@@ -162,7 +162,7 @@ bot.on('new_chat_participant', (msg) => {
         if (obj) {
             const newUser = msg.new_chat_participant;
             const name = newUser.last_name ? newUser.first_name + ' ' + newUser.last_name : newUser.first_name;
-            const username = newUser.username ? newUser.username : name;
+            const username = newUser.username ? '@' + newUser.username : name;
             const welcomeText = conf.welcomeText.replace('$username', username);
             bot.sendMessage(msg.chat.id, welcomeText);
         }
