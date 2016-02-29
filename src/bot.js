@@ -108,6 +108,7 @@ bot.on('new_chat_title', (msg) => {
     }
 });
 
+// titles bot command
 bot.onText(new RegExp(`^/titles(@${conf.botName})?( (.*))?$`), (msg, data) => {
     let date;
     let field;
@@ -128,6 +129,10 @@ bot.onText(new RegExp(`^/titles(@${conf.botName})?( (.*))?$`), (msg, data) => {
             bot.sendMessage(msg.from.id, `${resultDate} 并没有记录 (*ﾟーﾟ)`);
         }
     })
+});
+
+bot.onText(/^\/start$/, (msg) => {
+    bot.sendMessage(msg.from.id, conf.startText);
 });
 
 console.log('bot start up!');

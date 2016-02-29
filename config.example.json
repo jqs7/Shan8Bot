@@ -1,5 +1,6 @@
 {
-  "botAPI": "xxxxxx",
+  "botAPI": "xxx",
   "botName": "xxx",
-  "redisPass": "xxx"
+  "redisPass": "xxx",
+  "startText": "xxx"
 }
