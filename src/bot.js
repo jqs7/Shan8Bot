@@ -160,14 +160,10 @@ bot.on('new_chat_participant', (msg) => {
     const key = `Shan8Bot:welcome:${msg.chat.id}`
     r.get(key, (err, obj) => {
         if (obj) {
-            let username;
-
-            if (msg.new_chat_participant.username) {
-                username = '@' + msg.new_chat_participant.username;
-            } else {
-                username = msg.new_chat_participant.first_name + ' ' + msg.new_chat_participant.last_name
-            }
-            const welcomeText = conf.welcomeText.replace('$username', username)
+            const newUser = msg.new_chat_participant;
+            const name = newUser.last_name ? newUser.first_name + ' ' + newUser.last_name : newUser.first_name;
+            const username = newUser.username ? newUser.username : name;
+            const welcomeText = conf.welcomeText.replace('$username', username);
             bot.sendMessage(msg.chat.id, welcomeText);
         }
     })
