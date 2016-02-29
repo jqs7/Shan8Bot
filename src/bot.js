@@ -1,6 +1,7 @@
 "use strict";
 
 const Bot = require('node-telegram-bot-api');
+const async = require('async');
 const redis = require('redis');
 const conf = require('../config.json');
 
@@ -10,17 +11,6 @@ const bot = new Bot(conf.botAPI, { polling: true });
 // init redis
 const r = redis.createClient();
 r.auth(conf.redisPass);
-
-// check if array contains the obj
-Array.prototype.contains = function (obj) {
-    var i = this.length;
-    while (i--) {
-        if (this[i] === obj) {
-            return true;
-        }
-    }
-    return false;
-}
 
 // date formatter
 Date.prototype.formattedTime = function () {
@@ -45,7 +35,7 @@ function isGroup(msg) {
 
 // check msg is from master
 function isMaster(msg) {
-    if (conf.masters.contains(msg.from.username)) {
+    if (conf.masters.indexOf(msg.from.username) > -1) {
         return true;
     }
     return false;
@@ -112,17 +102,19 @@ bot.on('new_chat_title', (msg) => {
         const date = new Date(msg.date * 1000);
         const key = `Shan8Bot:ChatTitle:${msg.chat.id}`;
         const field = `${date.getFullYear() }:${date.getMonth() }:${date.getDate() }`;
-        r.hget(key, field, (err, obj) => {
-            if (!err) {
-                let titles = JSON.parse(obj);
-                if (!titles) {
-                    titles = [newTitle];
-                } else {
-                    titles.push(newTitle);
-                }
-                titles = JSON.stringify(titles);
-                r.hset(key, field, titles, redis.print);
-            }
+        async.waterfall([(next) => {
+            r.hget(key, field, next);
+        }, (obj, next) => {
+            let titles = JSON.parse(obj);
+            if (titles)
+                titles.push(newTitle);
+            else
+                titles = [newTitle];
+            next(null, JSON.stringify(titles));
+        }, (titles, next) => {
+            r.hset(key, field, titles, next);
+        }], (err, _) => {
+            if (err) console.log(err);
         });
     }
 });
@@ -139,15 +131,22 @@ bot.onText(new RegExp(`^/titles(@${conf.botName})?( (.*))?$`), (msg, data) => {
         date = new Date(msg.date * 1000);
         field = `${date.getFullYear() }:${date.getMonth() }:${date.getDate() }`;
     }
-    r.hget(key, field, (err, obj) => {
-        const resultDate = `${date.getFullYear() }年${date.getMonth() + 1}月${date.getDate() }日`;
+    const resultDate = `${date.getFullYear() }年${date.getMonth() + 1}月${date.getDate() }日`;
+    async.waterfall([(next) => {
+        r.hget(key, field, next);
+    }, (obj, next) => {
         if (obj) {
             const titles = JSON.parse(obj);
-            bot.sendMessage(msg.from.id, `${resultDate} 群名记录：\n${titles.join('\n') }`);
+            next(null, `${resultDate} 群名记录：\n${titles.join('\n') }`);
         } else {
-            bot.sendMessage(msg.from.id, `${resultDate} 并没有记录 (*ﾟーﾟ)`);
+            next(null, `${resultDate} 并没有记录 (*ﾟーﾟ)`);
         }
-    })
+    }], (err, result) => {
+        if (err)
+            console.log(err);
+        else
+            bot.sendMessage(msg.from.id, result);
+    });
 });
 
 // start command
@@ -174,18 +173,21 @@ bot.on('new_chat_participant', (msg) => {
 bot.onText(/\/welcome/, (msg) => {
     if (isGroup(msg) && isMaster(msg)) {
         const key = `Shan8Bot:welcome:${msg.chat.id}`
-        r.get(key, (err, obj) => {
-            if (obj) {
-                r.del(key, (err, obj) => {
-                    bot.sendMessage(msg.chat.id, 'welcome disabled');
-                });
-            } else {
-                r.set(key, true, (err, obj) => {
-                    bot.sendMessage(msg.chat.id, 'welcome enabled');
-                });
-            }
-        })
+
+        async.waterfall([(next) => {
+            r.get(key, next);
+        }, (obj, next) => {
+            if (obj)
+                r.del(key, (err, obj) => { next(err, 'disabled') });
+            else
+                r.set(key, true, (err, obj) => { next(err, 'enabled') });
+        }], (err, result) => {
+            if (err)
+                console.log(err);
+            else
+                bot.sendMessage(msg.chat.id, `welcome ${result}`);
+        });
     }
-})
+});
 
 console.log('bot start up!');
