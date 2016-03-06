@@ -271,6 +271,8 @@ bot.on('new_chat_participant', (msg) => {
     async.waterfall([(next) => {
         r.get(key, next);
     }, (obj, next) => {
+        if (obj) next(null, obj);
+    }, (obj, next) => {
         const newUser = msg.new_chat_participant;
         const name = newUser.last_name ? newUser.first_name + ' ' + newUser.last_name : newUser.first_name;
         const username = newUser.username ? '@' + newUser.username : name;
