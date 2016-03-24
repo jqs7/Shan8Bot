@@ -13,7 +13,7 @@ const r = redis.createClient();
 r.auth(conf.redisPass);
 
 // date formatter
-Date.prototype.formattedTime = function () {
+Date.prototype.formattedTime = function() {
     const zeroFormat = (d) => {
         return ("0" + d).substr(-2);
     };
@@ -22,7 +22,7 @@ Date.prototype.formattedTime = function () {
     const hours = zeroFormat(this.getHours());
     const minutes = zeroFormat(this.getMinutes());
     const seconds = zeroFormat(this.getSeconds());
-    return `${this.getFullYear() }.${month}.${day} ${hours}:${minutes}:${seconds}`;
+    return `${this.getFullYear()}.${month}.${day} ${hours}:${minutes}:${seconds}`;
 };
 
 // check if msg is from a group
@@ -65,13 +65,21 @@ bot.onText(/^(嘀|滴|打卡|签到|di)(.*)/, (msg) => {
             }, (obj, next) => {
                 const last = new Date(obj * 1000);
                 if (obj != null && isSameDate(date, last)) {
-                    bot.sendMessage(msg.from.id, `早安卡已获取\n时间为 ${last.formattedTime() }`);
+                    bot.sendMessage(msg.from.id, `早安卡已获取\n时间为 ${last.formattedTime()}`);
                 } else next(null, null)
             }, (obj, next) => {
                 r.hset(key, "last", msg.date);
-                r.hincrby(key, `${date.getFullYear() }:${date.getMonth() }`, 1, next);
+                r.hincrby(key, `${date.getFullYear()}:${date.getMonth()}`, 1, next);
             }, (obj, next) => {
-                bot.sendMessage(msg.from.id, `早呀早呀 (ฅ'ω'ฅ)​\n这是你这个月第 ${obj} 次打卡哟。\n今天又是美好的一天！`);
+                const mKey = `Shan8Bot:K`
+                const max = 20 - ((date.getHours() - 6) * 60 + date.getMinutes()) / 10;
+                const randK = Math.ceil(Math.random() * max);
+                r.zincrby(mKey, randK, msg.from.id, (err) => { next(err, obj, randK) })
+            }, (obj, randK, next) => {
+                bot.sendMessage(msg.from.id, `早呀早呀 (ฅ'ω'ฅ)​\n` +
+                    `这是你这个月第 ${obj} 次打卡哟。\n` +
+                    `本次打卡获得了 ${randK} 氪拉。\n` +
+                    `今天又是美好的一天！`);
             }]);
             break;
         }
@@ -90,12 +98,12 @@ bot.onText(/^(嘀|滴|打卡|签到|di)(.*)/, (msg) => {
             }, (obj, next) => {
                 const last = new Date(obj * 1000);
                 if (obj != null && isSameDate(date, last)) {
-                    bot.sendMessage(msg.from.id, `晚安卡已获取\n时间为 ${last.formattedTime() }`);
+                    bot.sendMessage(msg.from.id, `晚安卡已获取\n时间为 ${last.formattedTime()}`);
                 } else next(null, null)
             }, (obj, next) => {
                 switch (hour) {
                     case 22:
-                        const randKey = `Shan8Bot:night:rand:${msg.from.id}:${date.getMonth() }-${date.getDate() }`
+                        const randKey = `Shan8Bot:night:rand:${msg.from.id}:${date.getMonth()}-${date.getDate()}`
                         async.waterfall([(next) => {
                             r.incrby(randKey, 1, next);
                             r.expire(randKey, 60 * 60 * 3);
@@ -106,9 +114,17 @@ bot.onText(/^(嘀|滴|打卡|签到|di)(.*)/, (msg) => {
                                     `打了又不睡，搞笑咧。睡什么睡，插秧！哈哈哈哈哈。`);
                             } else if (obj >= randTimes) {
                                 r.hset(key, "last", msg.date);
-                                r.hincrby(key, `${date.getFullYear() }:${date.getMonth() }`, 1, (err, reply) => {
-                                    bot.sendMessage(msg.from.id, `真的要睡啦 ଘ(੭ˊ꒳​ˋ)੭✧\n那晚安哦。\n` +
-                                        `这是你这个月晚上第 ${reply} 次打卡。\n弯弯弯。\n`);
+                                r.hincrby(key, `${date.getFullYear()}:${date.getMonth()}`, 1, (err, reply) => {
+                                    const mKey = `Shan8Bot:K`
+                                    const max = 13 - ((date.getHours() - 22) * 60 + date.getMinutes()) / 10;
+                                    const randK = Math.ceil(Math.random() * max);
+                                    r.zincrby(mKey, randK, msg.from.id, (err) => {
+                                        bot.sendMessage(msg.from.id, `真的要睡啦 ଘ(੭ˊ꒳​ˋ)੭✧\n` +
+                                            `那晚安哦。\n` +
+                                            `这是你这个月晚上第 ${reply} 次打卡。\n` +
+                                            `本次打卡获得了 ${randK} 氪拉。\n` +
+                                            `弯弯弯。\n`);
+                                    });
                                 });
                             } else {
                                 const randTexts = [`都叫你现在先别睡啦还有那么多秧苗子要插呢。\n` +
@@ -126,8 +142,14 @@ bot.onText(/^(嘀|滴|打卡|签到|di)(.*)/, (msg) => {
                         break;
                     case 23:
                         r.hset(key, "last", msg.date);
-                        r.hincrby(key, `${date.getFullYear() }:${date.getMonth() }`, 1, (err, reply) => {
-                            bot.sendMessage(msg.from.id, `哦，晚安。`)
+                        r.hincrby(key, `${date.getFullYear()}:${date.getMonth()}`, 1, (err, reply) => {
+                            const mKey = `Shan8Bot:K`
+                            const max = 13 - ((date.getHours() - 22) * 60 + date.getMinutes()) / 10;
+                            const randK = Math.ceil(Math.random() * max);
+                            r.zincrby(mKey, randK, msg.from.id, (err) => {
+                                bot.sendMessage(msg.from.id, `哦，晚安。\n` +
+                                    `本次打卡获得了 ${randK} 氪拉。\n`);
+                            });
                         });
                         break;
                 }
@@ -146,7 +168,7 @@ bot.onText(/^🐥/, (msg) => {
     const date = new Date(msg.date * 1000);
     const mKey = `Shan8Bot:morning:${msg.from.id}`;
     async.waterfall([(next) => {
-        r.hget(mKey, `${date.getFullYear() }:${date.getMonth() }`, next);
+        r.hget(mKey, `${date.getFullYear()}:${date.getMonth()}`, next);
     }, (obj, next) => {
         let mCount;
         if (!obj) mCount = 0
@@ -156,7 +178,7 @@ bot.onText(/^🐥/, (msg) => {
         let resultMsg = `本月早上一共打卡 ${mCount} 次。\n`;
         if (obj) {
             const last = new Date(obj * 1000);
-            resultMsg += `最后一次打卡时间: ${last.formattedTime() }`
+            resultMsg += `最后一次打卡时间: ${last.formattedTime()}`
         }
         next(null, resultMsg);
     }, (resultMsg, next) => {
@@ -169,7 +191,7 @@ bot.onText(/^🐣/, (msg) => {
     const date = new Date(msg.date * 1000);
     const nKey = `Shan8Bot:night:${msg.from.id}`;
     async.waterfall([(next) => {
-        r.hget(nKey, `${date.getFullYear() }:${date.getMonth() }`, next);
+        r.hget(nKey, `${date.getFullYear()}:${date.getMonth()}`, next);
     }, (obj, next) => {
         let nCount;
         if (!obj) nCount = 0
@@ -179,7 +201,7 @@ bot.onText(/^🐣/, (msg) => {
         let resultMsg = `本月晚上一共打卡 ${nCount} 次。\n`;
         if (obj) {
             const last = new Date(obj * 1000);
-            resultMsg += `最后一次打卡时间: ${last.formattedTime() }`
+            resultMsg += `最后一次打卡时间: ${last.formattedTime()}`
         }
         next(null, resultMsg);
     }, (resultMsg, next) => {
@@ -193,20 +215,25 @@ bot.onText(/^🐤/, (msg) => {
     const mKey = `Shan8Bot:morning:${msg.from.id}`;
     const nKey = `Shan8Bot:night:${msg.from.id}`;
     async.waterfall([(next) => {
-        r.hget(mKey, `${date.getFullYear() }:${date.getMonth() }`, next);
+        r.hget(mKey, `${date.getFullYear()}:${date.getMonth()}`, next);
     }, (obj, next) => {
         let mCount;
         if (!obj) mCount = 0
         else mCount = obj
-        r.hget(nKey, `${date.getFullYear() }:${date.getMonth() }`, (err, obj) => { next(err, mCount, obj); });
+        r.hget(nKey, `${date.getFullYear()}:${date.getMonth()}`, (err, obj) => { next(err, mCount, obj); });
     }, (mCount, obj, next) => {
         let nCount;
         if (!obj) nCount = 0
         else nCount = obj
         next(null, mCount, nCount);
     }, (mCount, nCount, next) => {
-        bot.sendMessage(msg.from.id, `ヽ(*･ᗜ･)ﾉ早上打卡 ${mCount} 次 \n晚上打卡 ${nCount} 次ヽ(･ᗜ･* )ﾉ\n` +
-            `这个月你居然一共打卡 ${parseInt(mCount) + parseInt(nCount) } 次哎哟喂我的天了噜。`);
+        const mKey = `Shan8Bot:K`
+        r.zscore(mKey, msg.from.id, (err, obj) => { next(err, mCount, nCount, obj) });
+    }, (mCount, nCount, kCount, next) => {
+        bot.sendMessage(msg.from.id, `ヽ(*･ᗜ･)ﾉ早上打卡 ${mCount} 次 \n` +
+            `晚上打卡 ${nCount} 次ヽ(･ᗜ･* )ﾉ\n` +
+            `这个月你居然一共打卡 ${parseInt(mCount) + parseInt(nCount)} 次哎哟喂我的天了噜。\n` +
+            `氪拉余额： ${kCount}`);
     }])
 });
 
@@ -216,7 +243,7 @@ bot.on('new_chat_title', (msg) => {
         const newTitle = msg.new_chat_title;
         const date = new Date(msg.date * 1000);
         const key = `Shan8Bot:ChatTitle:${msg.chat.id}`;
-        const field = `${date.getFullYear() }:${date.getMonth() }:${date.getDate() }`;
+        const field = `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`;
         async.waterfall([(next) => {
             r.hget(key, field, next);
         }, (obj, next) => {
@@ -239,18 +266,18 @@ bot.onText(new RegExp(`^/titles(@${conf.botName})?( (.*))?$`), (msg, data) => {
     const key = `Shan8Bot:ChatTitle:${msg.chat.id}`;
     if (data[3]) {
         date = new Date(data[3]);
-        field = `${date.getFullYear() }:${date.getMonth() }:${date.getDate() }`;
+        field = `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`;
     } else {
         date = new Date(msg.date * 1000);
-        field = `${date.getFullYear() }:${date.getMonth() }:${date.getDate() }`;
+        field = `${date.getFullYear()}:${date.getMonth()}:${date.getDate()}`;
     }
-    const resultDate = `${date.getFullYear() }年${date.getMonth() + 1}月${date.getDate() }日`;
+    const resultDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
     async.waterfall([(next) => {
         r.hget(key, field, next);
     }, (obj, next) => {
         if (obj) {
             const titles = JSON.parse(obj);
-            next(null, `${resultDate} 群名记录：\n${titles.join('\n') }`);
+            next(null, `${resultDate} 群名记录：\n${titles.join('\n')}`);
         } else {
             next(null, `${resultDate} 并没有记录 (*ﾟーﾟ)`);
         }
