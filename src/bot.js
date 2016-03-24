@@ -230,6 +230,7 @@ bot.onText(/^🐤/, (msg) => {
         const mKey = `Shan8Bot:K`
         r.zscore(mKey, msg.from.id, (err, obj) => { next(err, mCount, nCount, obj) });
     }, (mCount, nCount, kCount, next) => {
+        if (!kCount) kCount = 0;
         bot.sendMessage(msg.from.id, `ヽ(*･ᗜ･)ﾉ早上打卡 ${mCount} 次 \n` +
             `晚上打卡 ${nCount} 次ヽ(･ᗜ･* )ﾉ\n` +
             `这个月你居然一共打卡 ${parseInt(mCount) + parseInt(nCount)} 次哎哟喂我的天了噜。\n` +
