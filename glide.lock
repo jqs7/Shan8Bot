@@ -1,0 +1,26 @@
+hash: 778a398493fcf15a11f716544ecb9efdd10e8d6b222c729144a602860f451e4e
+updated: 2016-04-30T17:56:58.084453493+08:00
+imports:
+- name: github.com/BurntSushi/toml
+  version: f0aeabca5a127c4078abb8c8d64298b147264b55
+- name: github.com/carlescere/scheduler
+  version: 5e2cc370dae40237c2a08b9181d4c84faf4150e9
+- name: github.com/technoweenie/multipartstreamer
+  version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: golang.org/x/sys
+  version: b776ec39b3e54652e09028aaaaac9757f4f8211a
+  subpackages:
+  - unix
+- name: gopkg.in/bsm/ratelimit.v1
+  version: db14e161995a5177acef654cb0dd785e8ee8bc22
+- name: gopkg.in/fsnotify.v1
+  version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
+- name: gopkg.in/redis.v3
+  version: b3514029955f38f2a1120b5c3ad59f241d9eecca
+  subpackages:
+  - internal/consistenthash
+  - internal/hashtag
+  - internal/pool
+- name: gopkg.in/telegram-bot-api.v4
+  version: 7bf755956c8c42f346269565bdb433b08a63df0b
+devImports: []
