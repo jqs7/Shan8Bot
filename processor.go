@@ -8,6 +8,7 @@ import (
 	"gopkg.in/telegram-bot-api.v4"
 )
 
+// made for @SusuwANjr with <3
 func processor(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if update.Message.From != nil {
 		idLogger(update.Message, bot)
