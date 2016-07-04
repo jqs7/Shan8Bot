@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -114,4 +115,51 @@ func welcome(msg *tgbotapi.Message, bot *tgbotapi.BotAPI) {
 		}
 		sendMsg(bot, msg.Chat.ID, "welcome enabled")
 	}
+}
+
+func transferK(from, to, value int) error {
+	KKey := "Shan8Bot:K"
+
+	if r.ZScore(KKey, strconv.Itoa(from)).Val() < float64(value) {
+		return errors.New("余额不足")
+	}
+	tx := r.Multi()
+	_, err := tx.Exec(func() error {
+		tx.ZIncrBy(KKey, float64(value), strconv.Itoa(to))
+		tx.ZIncrBy(KKey, float64(-value), strconv.Itoa(from))
+		return nil
+	})
+	if err != nil {
+		return errors.New("转账出错")
+	}
+	return nil
+}
+
+func transfer(msg *tgbotapi.Message, bot *tgbotapi.BotAPI) {
+	args := strings.Split(msg.CommandArguments(), " ")
+	value, err := strconv.Atoi(args[0])
+	if err != nil || value <= 0 {
+		bot.Send(tgbotapi.NewMessage(int64(msg.From.ID), "参数错误"))
+		return
+	}
+
+	to := 0
+	if len(args) > 1 {
+		to64, err := r.HGet("Shan8Bot:usernameToID", args[1]).Int64()
+		if err != nil {
+			bot.Send(tgbotapi.NewMessage(int64(msg.From.ID), "找不到此用户"))
+			return
+		}
+		to = int(to64)
+	} else if msg.ReplyToMessage != nil {
+		to = msg.ReplyToMessage.From.ID
+	} else {
+		return
+	}
+
+	if err := transferK(msg.From.ID, to, value); err != nil {
+		bot.Send(tgbotapi.NewMessage(int64(msg.From.ID), err.Error()))
+		return
+	}
+	bot.Send(tgbotapi.NewMessage(int64(msg.From.ID), "转账成功"))
 }

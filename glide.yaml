@@ -2,6 +2,7 @@ package: github.com/jqs7/Shan8Bot
 import:
 - package: github.com/BurntSushi/toml
 - package: github.com/carlescere/scheduler
-- package: gopkg.in/fsnotify.v1
+- package: github.com/fsnotify/fsnotify
+- package: github.com/spf13/viper
 - package: gopkg.in/redis.v3
 - package: gopkg.in/telegram-bot-api.v4

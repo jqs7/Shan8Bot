@@ -5,19 +5,24 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/BurntSushi/toml"
 	"github.com/carlescere/scheduler"
-
-	"gopkg.in/fsnotify.v1"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
 	"gopkg.in/redis.v3"
 )
 
 var r *redis.Client
 
 func init() {
-	confName := "conf.toml"
-	confWatcher(confName)
-	loadConf(confName)
+	viper.SetConfigName("conf")
+	viper.AddConfigPath(".")
+	viper.WatchConfig()
+	loadConf()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		if err := loadConf(); err != nil {
+			log.Println(err.Error())
+		}
+	})
 
 	r = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
@@ -39,28 +44,12 @@ func init() {
 	})
 }
 
-func confWatcher(confName string) {
-	watcher, err := fsnotify.NewWatcher()
-	exitIfErr(err)
-	go func() {
-		for {
-			select {
-			case event := <-watcher.Events:
-				if event.Op == fsnotify.Write {
-					loadConf(confName)
-				}
-			case err := <-watcher.Errors:
-				if err != nil {
-					log.Println("error:", err)
-				}
-			}
-		}
-	}()
-	err = watcher.Add(confName)
-	exitIfErr(err)
-}
-
-func loadConf(confName string) {
-	_, err := toml.DecodeFile(confName, &conf)
-	exitIfErr(err)
+func loadConf() error {
+	if err := viper.ReadInConfig(); err != nil {
+		return err
+	}
+	if err := viper.Unmarshal(&conf); err != nil {
+		return err
+	}
+	return nil
 }

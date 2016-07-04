@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"gopkg.in/telegram-bot-api.v4"
@@ -12,7 +13,7 @@ import (
 func check(msg *tgbotapi.Message, bot *tgbotapi.BotAPI) {
 	rand.Seed(time.Now().UnixNano())
 	switch {
-	case timeBetween(msg.Time(), 6, 0, 8, 0):
+	case timeBetween(msg.Time(), 5, 59, 8, 0):
 		key := fmt.Sprintf("Shan8Bot:morning:%d", msg.From.ID)
 		timeLast := strToTime(r.HGet(key, "last").Val())
 		if isSameDate(timeLast, msg.Time()) {
@@ -34,7 +35,7 @@ func check(msg *tgbotapi.Message, bot *tgbotapi.BotAPI) {
 				conf.MorningTexts[rand.Intn(len(conf.MorningTexts))]+"\n"+
 					conf.KPositive[rand.Intn(len(conf.KPositive))], randK)
 		}
-	case timeBetween(msg.Time(), 21, 30, 23, 30):
+	case timeBetween(msg.Time(), 21, 29, 23, 30):
 		key := fmt.Sprintf("Shan8Bot:night:%d", msg.From.ID)
 		timeLast := strToTime(r.HGet(key, "last").Val())
 		if isSameDate(timeLast, msg.Time()) {
@@ -81,7 +82,7 @@ func morningRank(msg *tgbotapi.Message, bot *tgbotapi.BotAPI) {
 		listLen = 10
 	}
 	if listLen == 0 {
-		sendMsg(bot, msg.From.ID, "今天还木有人打卡呢 ( ﾟ∀ﾟ)")
+		sendMsg(bot, msg.From.ID, "现在还木有人打卡呢 ( ﾟ∀ﾟ)")
 		return
 	}
 	result := "今日早起排行榜：\n"
@@ -101,19 +102,31 @@ func morningRank(msg *tgbotapi.Message, bot *tgbotapi.BotAPI) {
 }
 
 func KRank(msg *tgbotapi.Message, bot *tgbotapi.BotAPI) {
-	result := "氪拉排行榜\n"
-	for i, v := range r.ZRevRangeWithScores("Shan8Bot:K", 0, 9).Val() {
+	result, index := "", 1
+	for _, v := range r.ZRevRangeWithScores("Shan8Bot:K", 0, 10).Val() {
 		username := r.HGet("Shan8Bot:idToUsername", v.Member.(string)).Val()
 		if username == "" {
 			username = v.Member.(string)
 		}
-		switch i {
-		case 0:
-			result += fmt.Sprintf("%d. %s [ %0.f 氪拉 ] 🎀\n", i+1, username, v.Score)
-		case 1:
-			result += fmt.Sprintf("%d. %s [ %0.f 氪拉 ] 🔥\n", i+1, username, v.Score)
-		default:
-			result += fmt.Sprintf("%d. %s [ %0.f 氪拉 ]\n", i+1, username, v.Score)
+
+		if func(name string) bool {
+			for _, master := range conf.Masters {
+				if name == master {
+					return false
+				}
+			}
+			return true
+		}(strings.TrimLeft(username, "@")) {
+			if index == 1 {
+				result += fmt.Sprintf("%d. %s 🔥\n    %0.f kl\n", index, username, v.Score)
+			} else {
+				result += fmt.Sprintf("%d. %s \n    %0.f kl \n", index, username, v.Score)
+			}
+			index++
+		}
+
+		if index == 10 {
+			break
 		}
 	}
 	sendMsg(bot, msg.From.ID, result)
@@ -147,5 +160,6 @@ func totalCount(msg *tgbotapi.Message, bot *tgbotapi.BotAPI) {
 		"早上打卡 %d 次 \n"+
 		"晚上打卡 %d 次\n"+
 		"这个月一共打卡 %d 次。\n"+
-		"氪拉余额： %d 排名： %d", mCount, nCount, mCount+nCount, int(k), rank+1)
+		"氪拉余额： %d \n"+
+		"氪拉排名： %d", mCount, nCount, mCount+nCount, int(k), rank+1)
 }

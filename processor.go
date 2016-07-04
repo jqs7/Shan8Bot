@@ -10,6 +10,9 @@ import (
 
 // made for @SusuwANjr with <3
 func processor(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	if update.Message == nil {
+		return
+	}
 	if update.Message.From != nil {
 		idLogger(update.Message, bot)
 	}
@@ -70,5 +73,8 @@ func processor(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		update.Message.ReplyToMessage != nil &&
 		isMaster(update.Message) {
 		kick(update.Message, bot)
+	}
+	if update.Message.Command() == "transfer" {
+		transfer(update.Message, bot)
 	}
 }

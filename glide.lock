@@ -1,26 +1,52 @@
-hash: 778a398493fcf15a11f716544ecb9efdd10e8d6b222c729144a602860f451e4e
-updated: 2016-04-30T17:56:58.084453493+08:00
+hash: 84f603cc68facde05e99dd648962a33513bdfee856da4cc7d8ea208d209bae0b
+updated: 2016-07-04T18:42:40.265774699+08:00
 imports:
 - name: github.com/BurntSushi/toml
   version: f0aeabca5a127c4078abb8c8d64298b147264b55
 - name: github.com/carlescere/scheduler
   version: 5e2cc370dae40237c2a08b9181d4c84faf4150e9
+- name: github.com/fsnotify/fsnotify
+  version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
+- name: github.com/hashicorp/hcl
+  version: 61f5143284c041681f76a5b63efcb232aaa94737
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/token
+  - json/parser
+  - hcl/scanner
+  - hcl/strconv
+  - json/scanner
+  - json/token
+- name: github.com/magiconair/properties
+  version: c265cfa48dda6474e208715ca93e987829f572f8
+- name: github.com/mitchellh/mapstructure
+  version: d2dd0262208475919e1a362f675cfc0e7c10e905
+- name: github.com/spf13/cast
+  version: 27b586b42e29bec072fe7379259cc719e1289da6
+- name: github.com/spf13/jwalterweatherman
+  version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
+- name: github.com/spf13/pflag
+  version: 367864438f1b1a3c7db4da06a2f55b144e6784e0
+- name: github.com/spf13/viper
+  version: c1ccc378a054ea8d4e38d8c67f6938d4760b53dd
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: golang.org/x/sys
-  version: b776ec39b3e54652e09028aaaaac9757f4f8211a
+  version: a408501be4d17ee978c04a618e7a1b22af058c0e
   subpackages:
   - unix
 - name: gopkg.in/bsm/ratelimit.v1
   version: db14e161995a5177acef654cb0dd785e8ee8bc22
-- name: gopkg.in/fsnotify.v1
-  version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
 - name: gopkg.in/redis.v3
-  version: b3514029955f38f2a1120b5c3ad59f241d9eecca
+  version: b5e368500d0a508ef8f16e9c2d4025a8a46bcc29
   subpackages:
+  - internal
   - internal/consistenthash
   - internal/hashtag
   - internal/pool
 - name: gopkg.in/telegram-bot-api.v4
-  version: 7bf755956c8c42f346269565bdb433b08a63df0b
+  version: 217764ba453f319b00d05506e56d26ef0a9fc231
+- name: gopkg.in/yaml.v2
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
 devImports: []
