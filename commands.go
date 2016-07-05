@@ -162,4 +162,6 @@ func transfer(msg *tgbotapi.Message, bot *tgbotapi.BotAPI) {
 		return
 	}
 	bot.Send(tgbotapi.NewMessage(int64(msg.From.ID), "转账成功"))
+	bot.Send(tgbotapi.NewMessage(int64(to),
+		fmt.Sprintf("你刚刚从 %s 那获得了 %d 氪拉 🎈", userName(msg.From), value)))
 }

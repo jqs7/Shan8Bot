@@ -17,10 +17,13 @@ func init() {
 	viper.SetConfigName("conf")
 	viper.AddConfigPath(".")
 	viper.WatchConfig()
-	loadConf()
+	viper.ReadInConfig()
+	viper.Unmarshal(&conf)
 	viper.OnConfigChange(func(e fsnotify.Event) {
-		if err := loadConf(); err != nil {
+		if err := viper.Unmarshal(&conf); err != nil {
 			log.Println(err.Error())
+		} else {
+			log.Println("config auto reload!")
 		}
 	})
 
@@ -42,14 +45,4 @@ func init() {
 			}
 		}
 	})
-}
-
-func loadConf() error {
-	if err := viper.ReadInConfig(); err != nil {
-		return err
-	}
-	if err := viper.Unmarshal(&conf); err != nil {
-		return err
-	}
-	return nil
 }
